@@ -1,15 +1,24 @@
 " File: leBrief.vim
 " Purpose: Basic Brief Like emulation for vim
 " Author: Lechee.Lai
-" Version: 1.0
+" Version: 1.1
+"
+" I'm also a freshmen with vim (in one week) since some behaviour 
+" can not familiar in vim for example switch the buffer need type 
+" :bn(ext) / :bp(revious) it take a long time for me so my 
+" goal is define most recent use function as Meta-XX as brief 
+" like (not All Meta key combine are available in insert mode)  
 "
 " The script is not a brief emulation just a clone for brief like 
 " for beginner whom familiar with brief style editing with Meta-xx
-" This script is only guide for non-vim user use vim
+" This script is only guide for non-vim user use vim with A little 
+" brief style and explore the power of vim mode
+" 
+" === so make you own vim as start from here ===
 " 
 " leBrief.vim base on Yegappan iakshmanan brief.vim
 " 
-" brief http://www.vim.org/scripts/script.php?script_id=265
+" brief.vim http://www.vim.org/scripts/script.php?script_id=265
 " 
 " Most good script accompany with Brief like emulation
 " bufexplorer.vim http://www.vim.org/scripts/script.php?script_id=42
@@ -17,7 +26,89 @@
 " mru.vim http://www.vim.org/scripts/script.php?script_id=521
 "
 "
+" 1.0  21 SEP 2003
+"   Initial Revision
+" 1.1  25 SEP 2003
+"   Add more comment and a little hint
+"   
 "
+" ==== Read first ==== and redefine yourself
+"
+" Keymap -- META                -- real command in vim -- 
+" A-a   Empty                  
+" A-b   Show buffers 		:ls :buffers :files
+" A-c   Mark Column 
+" A-d   Delete Line     	dd
+" A-e   open file		:edit
+" A-f 	Empty
+" A-g   Goto Line		[line]gg
+" A-h   Quick help      	K
+" A-i   Insert/Replace
+" A-j	Goto BookMark		`[a-z]
+" A-k   Delete to End of Line   d$
+" A-l	Mark Line               V
+" A-m   Mark Stream             v
+" A-n   Empty
+" A-o   Empty
+" A-p	Empty
+" A-q	Quit			:q
+" A-r	Read File               :read 
+" A-s	Search                  /
+" A-t   Replace                 %s/\<pattern\>/gci
+"                               g = globe 
+"                               c = confirm      
+"                               i = ignore case
+" A-u	undo			u
+" A-v	find occurences         [Ctrl-I
+" A-w	Write                   :w
+" A-x	close			:close
+" A-y   mark word for search	#*
+" A-z	Shell			:stop
+" A-,	Previous Buffer         :bprevious
+" A-.   Next Buffer             :bnext
+" A-[   Search Pervious         n
+" A-]   Search Next             N
+" A-/	Complete                C-P/C-N
+" A-1..9 Bookmark Anchor        m[b..k]
+" --CONTROL--
+" C-B	tags back		:pop 
+" C-F	find tags		:tjump
+"
+" F3    split window            :split
+" F4    close window            :quit
+" F5    search                  /
+" F6    next window
+" F7    Brace Match             %
+" F8    Occurences under cursor [Ctrl-I
+" F10   command mode
+"                                
+" ------------- tip keymap -------------------
+" 
+" <C-X><C-L> 	Complete for line          
+" <C-X><C-F>    filename complete
+" <C-P><C-N>    Word Complete Previous/Next
+" g<C-]>	jump tag selection with duplicate case
+" *		next locate for search under cursor 
+" #             previous locate for search under cursor
+" %		find match for ({[]})
+" dd            delete line
+" dw            delete word
+" d$            delete to end of line
+" d^            delete to begin of line
+" J             join line
+" u		undo
+" /		search
+" . 		repeat last command 
+"
+" more tip are in online vimtip. you will falling love with vim :-)
+"
+" ------------- tip for install --------------
+"
+"   most people like me can not use META key in Windows with East Asia Language
+" install, I don't know why, but you can compiled the normal version to fixed
+" the problem 
+"
+"  
 
 set nocompatible
 set laststatus=2
@@ -34,6 +125,11 @@ set winaltkeys=no
 set nostartofline
 set noincsearch		
 
+" Phoenix Atags compitable env(Tagfile)
+if $tagfile != ""
+   let &tags = $tagfile . '\tags'
+endif
+ 
 " ---------- B r i e f E X  l i k e ------------- 
 
 " Next Buffer
@@ -53,12 +149,12 @@ inoremap <silent> <A-w> <C-O>:w<CR>
 map <silent> <A-w> :w<CR>
 
 " Quit
-inoremap <silent> <A-q> <C-O>:confirm quit<CR>
-map <silent> <A-q> :confirm quit<CR>
+inoremap <silent> <A-q> <C-O>:confirm qa<CR>
+map <silent> <A-q> :confirm qa<CR>
 
 " Undo
 inoremap <silent> <A-u> <C-O>u
-                             
+
 " Redo                              
 inoremap <silent> <C-U> <C-O>:redo<CR>
 
@@ -78,6 +174,10 @@ map <silent> <A-d> dd
 inoremap <A-e> <C-O>:edit 
 map <A-e> :edit 
 
+" read file
+inoremap <A-r> <C-O>:read  
+map <A-r> :read 
+
 " Search
 "inoremap <A-s> <C-O>:call <SID>SearchWord(expand("<cword>"))<CR>
 inoremap <A-s> <C-O>/<C-R><C-W>
@@ -92,6 +192,10 @@ map <A-]> n
 " Search Pervious
 inoremap <A-[> <C-O>N
 map <A-[> N
+
+" replace
+inoremap <A-t> <C-O>:%s/\<<c-r><c-w>\>
+inoremap <F6> <C-O>:/%s/\<<c-r><c-w>\>
 
 " Auto Complete                    
 inoremap <silent> <A-/> <C-p>
@@ -161,15 +265,20 @@ map <silent> <A-9> mk
 inoremap <silent> <A-j> <C-O>:call <SID>BriefJumpMark()<CR>
 map <silent> <A-j> :call <SID>BriefJumpMark()<CR>
 
+
+
+" ------ real brief home/end -------------------------------
 "
 " brief-home-key
 "inoremap <silent> <Home> <C-O>:call <SID>BriefHomeKey()<CR>
 "map <silent> <Home> :call <SID>BriefHomeKey()<CR>
-
+"
 " brief-end-key
 "inoremap <silent> <End> <C-O>:call <SID>BriefEndKey()<CR>
 "map <silent> <End> :call <SID>BriefEndKey()<CR>
-
+"
+" ------ real brief home/end -------------------------------
+"
 " Toggle insert mode
 inoremap <silent> <A-i> <Ins>
 
@@ -191,10 +300,12 @@ inoremap <silent> <A-a> <C-O><C-V>
 vnoremap <silent> <A-c> <C-V>
 vnoremap <silent> <A-a> <C-V>
 
-" Mark current word
-inoremap <silent> <A-y> <C-O>#*
-map <silent> <A-y> #*
-nmap = viw"ay
+" Mark current word for search
+inoremap <silent> <A-y> <C-O>my<C-O>*<C-O>`y
+map <silent> <A-y> my*`y
+
+" Mark current word for paste
+map = viw"ay
 
 " Copy line or mark to scrap buffer.  Vim register 'a' is used as the scrap
 " buffer
@@ -239,10 +350,11 @@ map <A-h> K
 
 "------ M i S C ----------------------
 inoremap <F10> <C-O>:
-inoremap <F8> <C-O>[I:let nr= input("Which one: ")<Bar> exe "normal " . nr . "[\t"<CR>
-map <F8> [I:let nr = input("Which one: ")<Bar> exe "normal " . nr . "[\t"<CR>
-inoremap <A-v> <C-O>:call <SID>BriefOccour()<CR>
-map <A-v> :call <SID>BriefOccour()<CR>
+noremap <F8> <ESC>:call <SID>UnderOccurences()<CR>
+inoremap <F8> <C-O>:call <SID>UnderOccurences()<CR>
+
+inoremap <A-v> <C-O>:call <SID>FindOccurences()<CR>
+map <A-v> :call <SID>FindOccurences()<CR>
 
 " Tags pattern for selection
 inoremap <C-F> <C-O>:tjump <C-R><C-W><CR>
@@ -251,16 +363,31 @@ map <C-F> :tjump <C-R><C-W><CR>
 " Tag back from :pop/tag
 inoremap <C-B> <C-O>:pop<CR>
 map <C-B> :pop<CR>
-              
-"-----------------------------------------------------------------------
-function! s:BriefOccour()
-   let pattern = input("Prompt Find: ")
-   exe "ilist /" . pattern
-   let nr = input("Which one: ")
-   " have problem goto specify line
-   "   exe "normal " . nr . "[\t"
-endfunction
 
+noremap <C-G> <ESC>:call <SID>ShowFunc("no")<CR>
+
+"-----------------------------------------------------------------------
+function! s:UnderOccurences()
+   exe "normal [I"
+   let nr = input("Which one: ")
+   if nr == ""
+       return
+   endif
+   exe "normal " . nr . "[\t"
+endfunction!
+
+function! s:FindOccurences()
+   let pattern = input("Prompt Find: ")
+   if pattern == ""
+       return
+   endif
+   exe "ilist " . pattern
+   let nr = input("Which one: ")
+   if nr == ""
+       return
+   endif
+   exe "ijump " . nr . pattern 
+endfunction
 
 function! s:BriefHomeKey()
    " if we are on the first char of the line, go to the top of the screen
@@ -378,3 +505,25 @@ function! s:BriefGotoLine()
     execute "normal " . linenr . "gg"
 endfunction
 
+" from http://www.vim.org/tips/tip.php?tip_id=79 and modified
+function! s:ShowFunc(sort) 
+  let gf_s = &grepformat 
+  let gp_s = &grepprg 
+  let &grepformat='%*\k%*\sfunction%*\s%l%*\s%f %m' 
+  if ( &filetype == "c" ) 
+    let &grepprg = 'ctags -x --'.&filetype.'-types=f --sort='.a:sort 
+  elseif ( &filetype == "vim" ) 
+    let &grepprg = 'ctags -x --vim-types=f --language-force=vim --sort='.a:sort 
+  elseif ( &filetype == "asm" )
+    let &grepprg = 'ctags -x --asm-types=l --language-force=asm --sort='.a:sort
+  endif 
+  if (&readonly == 0) | update | endif 
+  silent! grep % 
+  cwindow 10 
+  redraw   
+  let &grepformat = gf_s 
+  let &grepprg = gp_s 
+endfunc 
+
+
+" vim: shiftwidth=4
